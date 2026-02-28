@@ -167,7 +167,7 @@ You should see in the backend terminal:
 ## 📚 API Documentation
 
 ### Swagger UI
-**http://localhost:5000/api/docs**
+**https://finance-tracking-app-b121.onrender.com/api/docs/**
 
 Interactive docs — paste a JWT token in the Authorize button to test all endpoints directly in the browser.
 
