@@ -25,7 +25,7 @@ export const useTransactions = (initialFilters = {}) => {
 
   useEffect(() => {
     fetchTransactions(filters);
-  }, [filters]);
+  }, [filters,fetchTransactions]);
 
   const updateFilters = useCallback((newFilters) => {
     setFilters((prev) => ({ ...prev, ...newFilters, page: newFilters.page || 1 }));
