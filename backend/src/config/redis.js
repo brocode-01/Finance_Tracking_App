@@ -9,41 +9,28 @@ const getRedisClient = () => {
       ? process.env.REDIS_PASSWORD
       : undefined;
 
-    redis = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT) || 6379,
-      ...(password && { password }),
-      retryStrategy: (times) => {
-        if (times > 5) {
-          console.error(' Redis: Max retries reached. Caching disabled.');
-          return null; 
-        }
-        return Math.min(times * 200, 2000);
-      },
-      maxRetriesPerRequest: 1,
-      enableOfflineQueue: false, 
-      lazyConnect: false,
-    });
+    redis = process.env.REDIS_URL
+      ? new Redis(process.env.REDIS_URL, {
+          maxRetriesPerRequest: 1,
+          enableOfflineQueue: false,
+        })
+      : new Redis({
+          host: process.env.REDIS_HOST || 'localhost',
+          port: parseInt(process.env.REDIS_PORT) || 6379,
+          ...(password && { password }),
+          tls: process.env.NODE_ENV === 'production' ? {} : undefined,
+          maxRetriesPerRequest: 1,
+          enableOfflineQueue: false,
+          retryStrategy: (times) => {
+            if (times > 5) return null;
+            return Math.min(times * 200, 2000);
+          },
+        });
 
-    redis.on('connect', () => {
-      isConnected = true;
-      console.log(' Redis connected — caching is ACTIVE');
-    });
-
-    redis.on('ready', () => {
-      isConnected = true;
-      console.log(' Redis ready');
-    });
-
-    redis.on('error', (err) => {
-      isConnected = false;
-      console.error(' Redis error:', err.message);
-    });
-
-    redis.on('close', () => {
-      isConnected = false;
-      console.warn('  Redis connection closed');
-    });
+    redis.on('connect', () => { isConnected = true; console.log(' Redis connected'); });
+    redis.on('ready', () => { isConnected = true; console.log(' Redis ready'); });
+    redis.on('error', (err) => { isConnected = false; console.error(' Redis error:', err.message); });
+    redis.on('close', () => { isConnected = false; });
   }
   return redis;
 };
@@ -53,10 +40,7 @@ const cacheGet = async (key) => {
     const client = getRedisClient();
     if (!isConnected) return null;
     const data = await client.get(key);
-    if (data) {
-      console.log(` Cache HIT: ${key}`);
-      return JSON.parse(data);
-    }
+    if (data) { console.log(` Cache HIT: ${key}`); return JSON.parse(data); }
     console.log(` Cache MISS: ${key}`);
     return null;
   } catch (err) {
@@ -82,13 +66,9 @@ const cacheDel = async (pattern) => {
     if (!isConnected) return;
     if (pattern.includes('*')) {
       const keys = await client.keys(pattern);
-      if (keys.length > 0) {
-        await client.del(...keys);
-        console.log(`  Cache DELETED ${keys.length} keys matching: ${pattern}`);
-      }
+      if (keys.length > 0) await client.del(...keys);
     } else {
       await client.del(pattern);
-      console.log(`  Cache DELETED: ${pattern}`);
     }
   } catch (err) {
     console.error('Cache DEL error:', err.message);
@@ -97,13 +77,12 @@ const cacheDel = async (pattern) => {
 
 const checkRedisConnection = async () => {
   try {
-    const client = getRedisClient();
-    await client.ping();
+    await getRedisClient().ping();
     console.log(' Redis health check passed');
     return true;
   } catch (err) {
     console.error(' Redis health check failed:', err.message);
-    console.warn('  App will run WITHOUT caching (Redis unavailable)');
+    console.warn('  App will run WITHOUT caching');
     return false;
   }
 };
