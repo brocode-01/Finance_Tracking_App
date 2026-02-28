@@ -3,7 +3,9 @@
 Full-stack Personal Finance Tracker built with React 18, Node.js/Express, PostgreSQL, and Redis.
 
 ---
-
+## LIVE URL
+## FRONTEND: https://finance-tracking-app-alpha.vercel.app/login
+## BACKEND: https://finance-tracking-app-b121.onrender.com/
 ## 🏗️ Tech Stack
 
 | Layer | Technology |
