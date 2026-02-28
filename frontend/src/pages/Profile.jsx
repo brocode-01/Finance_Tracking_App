@@ -4,7 +4,7 @@ import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
 export default function Profile() {
-  const { user, isReadOnly, canWrite, isAdmin } = useAuth();
+  const { user, canWrite, isAdmin } = useAuth();
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirm: '' });
   const [pwLoading, setPwLoading] = useState(false);
 

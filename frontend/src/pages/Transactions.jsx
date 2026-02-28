@@ -16,8 +16,8 @@ export default function Transactions() {
   const [editingTx, setEditingTx] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
 
-  const {
-    transactions, pagination, filters, loading, totals,
+const {
+    transactions, pagination, filters, loading,
     updateFilters, createTransaction, updateTransaction, deleteTransaction
   } = useTransactions();
 

@@ -5,7 +5,6 @@ import API from '../services/api';
 export default function Performance() {
   const [metrics, setMetrics] = useState([]);
   const [cacheStatus, setCacheStatus] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [running, setRunning] = useState(false);
 
   const fetchCacheStatus = useCallback(async () => {
