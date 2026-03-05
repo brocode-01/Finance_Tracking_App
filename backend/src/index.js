@@ -75,6 +75,15 @@ app.listen(PORT, async () => {
   console.log(` API Docs:     http://localhost:${PORT}/api/docs`);
   console.log(` Cache Status: http://localhost:${PORT}/api/cache/status\n`);
   await checkRedisConnection();
+  if (process.env.NODE_ENV === 'production') {
+  const https = require('https');
+  setInterval(() => {
+    https.get('https://finance-tracking-app-b121.onrender.com/health', (res) => {
+      console.log('Keep-alive ping:', res.statusCode);
+    }).on('error', () => {});
+  }, 14 * 60 * 1000); 
+}
 });
+
 
 module.exports = app;
